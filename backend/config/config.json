@@ -1,0 +1,26 @@
+{
+  "development": {
+    "username": "admindb",
+    "password": "@76+VEs8c2+6<niDU$Wb",
+    "database": "best_todo_ever",
+    "host": "192.168.1.15",
+    "dialect": "mysql",
+    "operatorsAliases": 0
+  },
+  "test": {
+    "username": "admindb",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "operatorsAliases": false
+  },
+  "production": {
+    "username": "admindb",
+    "password": null,
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "operatorsAliases": false
+  }
+}
