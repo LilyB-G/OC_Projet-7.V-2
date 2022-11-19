@@ -1,0 +1,57 @@
+Arguments: 
+  C:\Program Files\nodejs\node.exe C:\Users\justp\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js install
+
+PATH: 
+  C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\iCLS\;C:\Program Files\Intel\Intel(R) Management Engine Components\iCLS\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Program Files\dotnet\;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;C:\Program Files (x86)\dotnet\;C:\Users\justp\AppData\Local\Microsoft\WindowsApps;;C:\Users\justp\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\justp\AppData\Roaming\npm
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  18.0.0
+
+Platform: 
+  win32 x64
+
+Trace: 
+  Error: EPERM: operation not permitted, copyfile 'C:\Users\justp\AppData\Local\Yarn\Cache\v6\npm-es5-ext-0.10.62-5e6adc19a6da524bf3d1e02bbc8960e5eb49a9a5-integrity\node_modules\es5-ext\_postinstall.js' -> 'C:\Users\justp\OneDrive\Bureau\P7-Groupomania\vid-api\node_modules\es5-ext\_postinstall.js'
+
+npm manifest: 
+  {
+    "name": "best_todo_ever",
+    "version": "1.0.0",
+    "description": "",
+    "main": "server.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "start": "nodemon server.js",
+      "dev": "nodemon server.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "bcrypt": "^5.0.1",
+      "body-parser": "^1.19.0",
+      "cookie-parser": "^1.4.6",
+      "cors": "^2.8.5",
+      "dotenv": "^16.0.0",
+      "email-validator": "^2.0.4",
+      "express": "^4.17.1",
+      "fs": "^0.0.1-security",
+      "jsonwebtoken": "^8.5.1",
+      "multer": "^1.4.4",
+      "mysql2": "^2.1.0",
+      "password-validator": "^5.2.1",
+      "path": "^0.12.7",
+      "sequelize": "^5.21.3",
+      "sequelize-cli": "^5.5.1",
+      "yarn": "^1.22.19"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
