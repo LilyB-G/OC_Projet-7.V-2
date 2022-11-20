@@ -24,11 +24,11 @@ exports.signup = async (req, res, next) => {
       return res.status(401).json({ error: 'Email existant !' });
     }
 
-        // pas de password validator en dev merci !
-   // else if (!mailValidator.validate(req.body.email) || (!schema.validate(req.body.password))) {  
-   //    throw { error: " Schema invalide" }  
-   //  } 
-   //  else if (mailValidator.validate(req.body.email) && (schema.validate(req.body.password)))
+       
+   else if (!mailValidator.validate(req.body.email) || (!schema.validate(req.body.password))) {  
+      throw { error: " Schema invalide" }  
+    } 
+    else if (mailValidator.validate(req.body.email) && (schema.validate(req.body.password)))
     
     bcrypt.hash(req.body.password, 10)
         .then(hash => {
