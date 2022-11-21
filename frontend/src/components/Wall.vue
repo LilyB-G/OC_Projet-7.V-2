@@ -44,31 +44,33 @@
           <h3 class="text-center mb-6"> Dernières publications </h3>
 
 
-          <v-card class="spacing" v-for="post in posts" :key="post.id">
+          <v-card class="spacing" v-for="post in posts" :key="post.id" elevation="2">
             <div v-if="post.imageUrl">
               <v-img :src="post.imageUrl" aspect-ratio="2.75"></v-img>
             </div>
             <v-card-title secondary-title>
-              <div>
+              <div class="text">
                 <h3> Auteur: {{ post.User.username }} </h3>
                 <h3 class="headline mb-0"> Titre: {{ post.title }}</h3>
                 <p align="left">Description: </p>
                 <p v-if="(post.UserId != userId)">{{ post.content }} </p>
-                <v-text-field label="content" hide-details="auto" :value="post.content" @input="editPost"
+                
+                <v-text-field label="content" v-else hide-details="auto" :value="post.content" @input="editPost"
+                
                 ></v-text-field>
                 
 
               </div>
             </v-card-title>
             <v-card-actions>
-              <v-spacer></v-spacer>
+              <v-spacer></v-spacer> 
               <v-btn color="black" class="white--text" v-show="userId == post.UserId || isAdmin == 'true'"
-                @click="updatePost(post.id,currentPost)" right rounded small>
-                <v-icon icon="mdi:pencil" >modifier </v-icon>
+                @click="updatePost(post.id,currentPost)" right rounded small>modifier
+                
               </v-btn>
               <v-btn color="red" class="white--text" v-show="userId == post.UserId || isAdmin == 'true'"
-                @click="deletePost(post.id)" right rounded small>
-                <v-icon icon="mdi:clear">effacer </v-icon>
+                @click="deletePost(post.id)" right rounded small>effacer
+               
               </v-btn>
             </v-card-actions>
 
@@ -86,23 +88,24 @@
                 {{ comment.User.username }}: {{ comment.content }}
                 <v-spacer></v-spacer>
 
-                <v-row>
-                  <v-btn color="#4E5166" elevation="2" @click="addlike(comment.id)">
+                <v-row >
+                  <!-- <p>{{comment}}</</p> -->
+                  <p>{{comment.like}} like </p>
+                  <v-btn color="#4E5166" elevation="2" @click="addlike(comment.id)" v-if="canlike(comment.id)">
                     <Icon icon="mdi:thumb-up" />
                   </v-btn>
-                  {{ comment.Like }}
-                  <v-btn color="#FFD7D7" elevation="2" @click="dislike(comment.id, userId)">
+                  <p> - {{ comment.disLike }} dislike </p>
+                  <v-btn color="#FFD7D7" elevation="2" @click="dislike(comment.id, userId)" v-if="candislike(comment.id)">
                     <Icon icon="mdi:thumb-down-outline" />
-
                   </v-btn>
-                  {{ comment.disLike }}
+                  
                 </v-row>
 
 
 
                 <v-btn color="red" class="white--text" @click="deleteComment(comment.id)"
                   v-show="userId == comment.UserId || isAdmin == 'true'" depressed right rounded small>
-                  <v-icon icon="mdi:Clear"> </v-icon>
+                  effacer
                 </v-btn>
               </v-card-title>
 
@@ -144,13 +147,13 @@ export default {
         v => v.length >= 3 || 'Pas assez long'
       ],
       currentPost:"",
-    }
+      }
   },
   components: {
     Icon,
   },
   created() {
-    this.userId = localStorage.getItem("userId");
+    this.userId = localStorage.getItem("userId"); //copie les variables du LS dans la page en cours
     this.token = localStorage.getItem("token");
     this.isAdmin = localStorage.getItem("isAdmin");
     this.fetchPost();
@@ -290,69 +293,130 @@ export default {
     },
 
     async addlike(idcomment) {
-      const likes = localStorage.getItem("likes");
+      
+      const row = this.comments.find(comment => comment.id == idcomment);
+      let newarray= row.usersLiked.split(',');
+      let newlikecount=0;
+      let newdislikecount=0;
 
-      let newlike = 0;
-      if (likeStatement(idcomment, localStorage.getItem("userId")) == undefined || likeStatement(idcomment, localStorage.getItem("userId")) == 0) { newlike = "1" };
-      if (likeStatement(idcomment, localStorage.getItem("userId")) == -1) { newlike = "0+" };
+      const strdis = this.userId + "|-1";
+      const strli = this.userId + "|1";
 
-      if (newlike == "1") {
-
-
-        localStorage.setItem("likes", likes + ',' + idcomment + "|" + localStorage.getItem("userId") + "|" + newlike.substring(0, 1));
-
+      if ( row.usersLiked.indexOf(strdis) > 0 ){                                 // si l'utilisateur a déjà "disliké"
+            console.log( "déja dislike" );
+          newarray = newarray.filter((r) => { r.usersLiked != strdis });             // suppression de l'action du précédent dislike
+            console.log(newarray);
+          newlikecount = Number(row.Like) > 0 ? Number(row.Like) : 0;           // compteur like reste inchangé + gestion initialisation si valeur = undefined => compteur=0 
+          newdislikecount = Number(row.disLike) > 0 ? Number(row.disLike) - 1 : 0;  // décrémént compteur dislike 
       };
-      if (newlike == "0+") {
-        const array = likes.split(',');
-        const newarray = array.filter(r => !r.includes(idcomment + "|" + localStorage.getItem("userId") + "|"));
-        localStorage.setItem("likes", newarray.toString());
-      };
 
-      const token = this.token;
-      axios.post(`http://localhost:3000/api/comment/like/${idcomment}`,
-        { CommentId: idcomment, like: newlike },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        })
-        .then((response) => response.status >= 200 || response.status <= 201 ? location.reload(true) : console.log(response.status))
-        .catch(error => console.log(error));
+      if ( row.usersLiked.indexOf(strli) == -1 && row.usersLiked.indexOf(strdis) == -1 ){     // si l'utilisateur n'a jamais "liké" / jamais "disliké" et userliked inchangé
+          console.log("cas like");
+          newarray.push( strli );                                                 // ajout attributs idcomment | iduser | 1
+          newlikecount = Number(row.Like) > 0 ? Number(row.Like) + 1 : 1 ;        // incrément compteur like ou compteur = 1 dans le cas ou valeur = undefined
+          newdislikecount = Number(row.disLike) > 0 ? Number(row.disLike) : 0 ;   // compteur dislike inchangé + gestion initialisation si valeur = undefined => compteur=0 
+      };
+      
+      if ( newdislikecount > 0 || newlikecount > 0 || newarray != row.usersLiked.split(',')){
+              
+              
+              const token = this.token;
+              axios.post(`http://localhost:3000/api/comment/like/${idcomment}`,
+                { CommentId: idcomment,
+                  usersLiked : newarray.toString(),
+                  like: newlikecount.toString(),
+                  dislike: newdislikecount.toString(),
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  }
+                })
+                .then((response) => response.status >= 200 || response.status <= 201 ? location.reload(true) : console.log(response.status))
+                //.then((response) => response.status >= 200 || response.status <= 201 ? console.log("success") : console.log(response.status))
+                .catch(error => console.log(error));
+              };
     },
 
     async dislike(idcomment) {
 
-      console.log(idcomment)
+      const row = this.comments.find(comment => comment.id == idcomment);
+      let newarray= row.usersLiked.split(',');
+      let newlikecount=0;
+      let newdislikecount=0;
 
-      const likes = localStorage.getItem("likes").split(',');
-      let newlike = 0;
-      if (likeStatement(idcomment, localStorage.getItem("userId")) == undefined || likeStatement(idcomment, localStorage.getItem("userId")) == 0) { newlike = "-1" };
-      if (likeStatement(idcomment, localStorage.getItem("userId")) == 1) { newlike = "0-" };
+      const strdis = this.userId + "|-1";
+      const strli = this.userId + "|1";
 
-      if (newlike == "-1") {
-        localStorage.setItem("likes", likes + ',' + idcomment + "|" + localStorage.getItem("userId") + "|" + newlike.substring(0, 1));
+      if ( row.usersLiked.indexOf(strli) > 0 ){                                       // si l'utilisateur a déjà "liké"
+            console.log( "déja like" );
+          newarray = newarray.filter((r) => { r.usersLiked != strli });                     // suppression de l'action du précédent like
+            console.log(newarray);
+          newlikecount = Number(row.Like) > 0 ? Number(row.Like) - 1 : 0;             // décrémént compteur like 
+          newdislikecount = Number(row.disLike) > 0 ? Number(row.disLike) : 0;        // compteur dislike reste inchangé + gestion initialisation si valeur = undefined => compteur=0 
       };
-      if (newlike == "0-") {
-        const array = likes.split(',');
-        const newarray = array.filter(r => !r.includes(idcomment + "|" + localStorage.getItem("userId") + "|"));
-        localStorage.setItem("likes", newarray.toString());
-      };
 
-      const token = this.token;
-      axios.post(`http://localhost:3000/api/like/${idcomment}`,
-        { CommentId: idcomment, like: newlike },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+      if ( row.usersLiked.indexOf(strdis) == -1 && row.usersLiked.indexOf(strli) == -1 ){       // si l'utilisateur n'a jamais "disliké" / jamais "liké" et userliked inchangé
+          console.log("cas dislike")
+          newarray.push( strdis );                                                    // ajout attributs idcomment | iduser | -1
+          newlikecount = Number(row.Like) > 0 ? Number(row.Like) : 0 ;                // compteur like inchangé + gestion initialisation si valeur = undefined => compteur=0 
+          newdislikecount = Number(row.disLike) > 0 ? Number(row.disLike) + 1 : 1 ;   // incrément compteur dislike ou compteur = 1 dans le cas ou valeur = undefined
+      };      
+      
+      if ( newdislikecount > 0 || newlikecount > 0 || newarray != row.usersLiked.split(',')){
+      
+          const token = this.token;
+          axios.post(`http://localhost:3000/api/comment/like/${idcomment}`,
+            { CommentId: idcomment,
+              usersLiked : newarray.toString(),
+              like: newlikecount.toString(),
+              dislike: newdislikecount.toString(),
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              }
+            })
+            .then((response) => response.status >= 200 || response.status <= 201 ? location.reload(true) : console.log(response.status))
+            //.then((response) => response.status >= 200 || response.status <= 201 ? console.log("success") : console.log(response.status))
+            .catch(error => console.log(error));
+      };
+    },
+
+    canlike(commentId) {
+
+        for (let row of this.comments){
+
+          if (row.id == commentId){
+            const array = row.usersLiked != null ? row.usersLiked.split(",") : [];  
+            const asliked = this.userId + "|1";
+            if ( array.length > 0 && array.includes(asliked)){
+              return false
+            }
           }
-        })
-        .then((response) => response.status >= 200 || response.status <= 201 ? location.reload(true) : console.log(response.status))
-        .catch(error => console.log(error));
+          };
+
+          return true;
+    
     },
 
-    causemoi(val) {
-      console.log(val);
+    candislike(commentId) {
+       for (let row of this.comments){
+
+          if (row.id == commentId){
+            const array = row.usersLiked != null ? row.usersLiked.split(",") : [];  
+            const asliked = this.userId + "|-1";
+            if ( array.length > 0 && array.includes(asliked)){
+              return false
+            }
+          }
+          };
+
+          return true;
+    
     },
+
+
 
   },
 
@@ -360,30 +424,26 @@ export default {
 };
 
 
-export function likeStatement (idcomment,iduser){
+export function likeStatement (idcomment, comments){
+      
+      //console.log(comments);
           
-          if ( localStorage.getItem("likes") !== null ){
-        
-            const array = localStorage.getItem("likes");
-        
-            if (array.includes( idcomment + "|" + iduser + "|-1" )) {
-                return -1;
-              };
-              if (array.includes( idcomment + "|" + iduser + "|1" )) {
-                return 1;
-              };
+        for (let comment of comments){
+
+          if (comment.id == idcomment && comment.userlikes != undefined){
+            let array = comment.userlikes.split(',');
+
+            if (array[1]== userId ){
+              return array[2];
+            }else{
               return 0;
-        
-          }else{
-            const str = "";
-            localStorage.setItem("likes",str);    
-            return 0;
+            }
+
           }
-        
-        };
-
-
-
+        }
+};
+  
+  
 </script>
 
 <style scoped>
@@ -394,4 +454,8 @@ export function likeStatement (idcomment,iduser){
 #inspire {
   background-color: #aeadb6;
 }
+
+.text{ width: 100%;
+}
+
 </style>
