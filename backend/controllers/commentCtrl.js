@@ -7,7 +7,7 @@ require("dotenv").config();
 
 exports.getAllComments = async (req, res, next) => {
   await db.Comment.findAll({
-        attributes: ["UserId", "id", "content", "createdAt", "PostId", "like", "disLike"],
+        attributes: ["UserId", "id", "content", "createdAt", "PostId", "like", "disLike", "usersLiked"],
         order: [["createdAt", "DESC"]],
         include: [db.User],
         // where: {PostId: req.params.id}  
@@ -63,64 +63,31 @@ exports.like = async (req, res) => {
     const userId = decodedToken.userId;
     const CommentId = req.params.id;
     
-    console.log(req.params);
+    //console.log(req.params);
 
-    let Like = "";
-    let disLike = "";
-    let usersLiked = "";
-    let arrayofusers= [];
+    if (decodedToken){
+        let comment = await db.Comment.findOne({ where: { id: CommentId } })
 
-    let comment = await db.Comment.findOne({ where: { id: CommentId } })
-    
-    if ( comment.usersLiked != null &&  comment.usersLiked.length > 0 ){
-        arrayofusers = comment.usersLiked.split(',');
-    };
-
-            if (req.body.like == "1" ){
-                    Like = ( Number(comment.Like) + 1 ).toString();
-                    usersLiked =  arrayofusers.push(userId).toString();
-                    disLike = comment.disLike;
-            };
-            if (req.body.like == "0+" ){     // user avec précédent like change d'avis
-                 
-                    Like = ( Number(comment.Like) - 1 ).toString();
-                    usersLiked= arrayofusers.filter(r => r != userId).toString();
-                    disLike = comment.disLike;
-                
-            };
-            if (req.body.like == "0-" ){     // user avec précédent dislike change d'avis
-                 
-                    disLike = ( Number(comment.disLike) - 1 ).toString();
-                    usersLiked= arrayofusers.filter(r => r != userId).toString();
-                    Like = comment.Like;
-                
-            };
-            if (req.body.like == "-1" ){
-                 
-                    disLike = ( Number(comment.disLike) + 1 ).toString();
-                    usersLiked =  arrayofusers.push(userId).toString();
-                    Like = comment.Like;
-                
-            };
-            
-            console.log('commentId: ' + CommentId);
-
-            const result = comment.update({
-                Like:Like,
-                disLike:disLike,
-                usersLiked:usersLiked,
+        try {
+            await comment.update({
+                Like: req.body.like,
+                disLike: req.body.dislike,
+                usersLiked:req.body.usersLiked,
             },
             {
                 where: {id: CommentId},
 
-            }); 
+            });
+            res.status(200).json({msg: "like updated"}); 
 
-            if(result){
-                res.status(200).json({msg: "like updated"});
-            }else{
-                res.status(500).json({msg: "like failed"});
-            }
-       
+        } catch(err){
+            console.log(err);
+            res.status(500).json({msg: "like failed"});
+        };
+    }else{
+        res.status(400).json({msg: "unhautorized token"});
+    }
+
 }
 
 
