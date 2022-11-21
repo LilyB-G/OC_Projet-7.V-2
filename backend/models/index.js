@@ -32,8 +32,8 @@ Object.keys(db).forEach(modelName => {
   }
 });
 
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
+db.sequelize = sequelize; 
+db.Sequelize = Sequelize; //objet
 
 db.User.hasMany(db.Post, {onDelete:'CASCADE'});
 db.Post.belongsTo(db.User, {
