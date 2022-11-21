@@ -65,8 +65,8 @@ export default {
         }
     },
     created() {
-        localStorage.clear();
-    },
+        localStorage.clear(); //A la création de la page, vider le LS. Ne garde pas les valeurs 
+    },                        //pour les prochaines sessions
 
   methods: {
    login() {
